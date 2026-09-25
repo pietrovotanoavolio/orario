@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantità di moto e urti — IV Liceo Scientifico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{
+    --bg: #0c1c2c;
+    --bg-alt: #10263c;
+    --ink: #eee7d8;
+    --ink-dim: #93a9bd;
+    --accent: #e2a33c;
+    --accent2: #5fada0;
+    --rule: rgba(238,231,216,0.14);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    overflow: hidden;
+  }
+  .deck{ position:relative; width:100vw; height:100vh; }
+  .slide{
+    position:absolute; inset:0;
+    display:none;
+    padding: 7vh 9vw 8vh;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .slide.active{ display:flex; }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--accent2);
+    margin-bottom: 1.1rem;
+  }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: clamp(2.1rem, 4.6vw, 3.6rem);
+    line-height: 1.08;
+    margin: 0 0 0.6em 0;
+    max-width: 16ch;
+  }
+  h2{
+    font-family:'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    margin: 0 0 0.9em 0;
+    color: var(--ink);
+  }
+  h3{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--accent);
+    margin: 1.6em 0 0.5em 0;
+  }
+  p{ font-size: 1.08rem; line-height: 1.6; color: var(--ink-dim); max-width: 62ch; margin: 0 0 0.9em 0; }
+  .lede{ font-size: 1.25rem; color: var(--ink); max-width: 52ch; }
+  ul{ margin: 0; padding: 0; max-width: 64ch; }
+  li{ list-style:none; font-size: 1.06rem; line-height:1.6; color: var(--ink-dim); padding: 0.4em 0 0.4em 1.3em; position:relative; border-top:1px solid var(--rule); }
+  li:first-child{ border-top:none; }
+  li::before{ content:"—"; position:absolute; left:0; color: var(--accent2); }
+  .formula{
+    font-size: 1.1rem;
+    background: var(--bg-alt);
+    border-left: 3px solid var(--accent);
+    padding: 0.9em 1.2em;
+    margin: 0.6em 0 1em 0;
+    max-width: fit-content;
+  }
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 3.2rem; align-items:start; }
+  .card{ background: var(--bg-alt); border-radius: 4px; padding: 1.5em 1.6em; }
+  .card h3{ margin-top:0; }
+  .card .formula{ background: rgba(0,0,0,0.18); }
+  .tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--bg);
+    background: var(--accent2);
+    padding: 0.18em 0.55em;
+    border-radius: 3px;
+    margin-bottom: 0.8em;
+  }
+  .num{ font-family:'Source Serif 4', serif; font-size: 3.4rem; color: var(--accent); line-height:1; margin-bottom:0.15em; }
+  .foot{ position:absolute; bottom: 2.4vh; left: 9vw; right: 9vw; display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:0.74rem; color: var(--ink-dim); border-top:1px solid var(--rule); padding-top:0.7em; }
+  .prog{ display:flex; gap:5px; }
+  .dot{ width:5px; height:5px; border-radius:50%; background: var(--rule); }
+  .dot.on{ background: var(--accent); }
+  .nav{ position:fixed; top:0; left:0; right:0; height:100%; z-index:5; }
+  .nav button{
+    position:absolute; top:50%; transform:translateY(-50%);
+    background: transparent; border:none; color: var(--ink-dim);
+    font-size: 1.8rem; cursor:pointer; padding: 1em 0.6em;
+    transition: color 0.15s;
+  }
+  .nav button:hover{ color: var(--accent); }
+  .nav .prev{ left: 0.5vw; }
+  .nav .next{ right: 0.5vw; }
+  code.latex-tag{ font-family:'IBM Plex Mono', monospace; color:var(--accent2); font-size:0.82em; }
+  .center-block{ max-width: 40ch; }
+  .hero-eq{ font-size: 1.5rem; margin-top: 0.4em; }
+  .title-orbit{
+    position:absolute; right: 6vw; top: 50%; transform: translateY(-50%);
+    width: 30vw; height: 30vw; max-width: 380px; max-height: 380px;
+    opacity: 0.9;
+  }
+  .mjx-chtml{ color: var(--ink) !important; }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1: Titolo -->
+  <section class="slide active">
+    <div class="kicker">FISICA · CLASSE QUARTA</div>
+    <h1>Quantità di moto,<br>conservazione, urti</h1>
+    <p class="lede">Dal lavoro e dall'energia a una seconda grandezza che si conserva: come prevedere l'esito di un urto senza conoscerne i dettagli interni.</p>
+    <svg class="title-orbit" viewBox="0 0 200 200">
+      <circle cx="60" cy="100" r="14" fill="none" stroke="#e2a33c" stroke-width="1.6" opacity="0.7"/>
+      <circle cx="140" cy="100" r="9" fill="none" stroke="#5fada0" stroke-width="1.6" opacity="0.7"/>
+      <line x1="30" y1="100" x2="80" y2="100" stroke="#e2a33c" stroke-width="1.2" marker-end="url(#arrow1)" opacity="0.6"/>
+      <line x1="170" y1="100" x2="130" y2="100" stroke="#5fada0" stroke-width="1.2" marker-end="url(#arrow2)" opacity="0.6"/>
+      <defs>
+        <marker id="arrow1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e2a33c"/></marker>
+        <marker id="arrow2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5fada0"/></marker>
+      </defs>
+    </svg>
+  </section>
+
+  <!-- 2: Obiettivi -->
+  <section class="slide">
+    <div class="kicker">01 — Percorso della lezione</div>
+    <h2>Cosa costruiamo oggi</h2>
+    <ul>
+      <li>Richiamo: lavoro, energia cinetica e potenziale, conservazione dell'energia meccanica</li>
+      <li>Quantità di moto e impulso: una grandezza vettoriale legata alla forza nel tempo</li>
+      <li>Sistema isolato: quando la quantità di moto totale non cambia</li>
+      <li>Urti elastici, anelastici e anelastici parziali: cosa si conserva e cosa no</li>
+      <li>Verifica al computer: un simulatore interattivo generato con l'IA</li>
+    </ul>
+  </section>
+
+  <!-- 3: Richiamo energia -->
+  <section class="slide">
+    <div class="kicker">02 — Richiami</div>
+    <h2>Lavoro ed energia</h2>
+    <div class="grid2">
+      <div>
+        <h3>Lavoro</h3>
+        <div class="formula">\[ W = \vec{F}\cdot\vec{d} = F\,d\cos\theta \]</div>
+        <h3>Teorema dell'energia cinetica</h3>
+        <div class="formula">\[ W_{tot} = \Delta E_k \]</div>
+      </div>
+      <div>
+        <h3>Energia cinetica</h3>
+        <div class="formula">\[ E_k = \tfrac{1}{2} m v^2 \]</div>
+        <h3>Energia potenziale gravitazionale</h3>
+        <div class="formula">\[ E_p = m g h \]</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4: Conservazione energia -->
+  <section class="slide">
+    <div class="kicker">02 — Richiami</div>
+    <h2>Conservazione dell'energia meccanica</h2>
+    <p class="lede">Vale solo in assenza di forze dissipative — in presenza di sole forze conservative.</p>
+    <div class="formula hero-eq">\[ E_{k,i} + E_{p,i} = E_{k,f} + E_{p,f} \]</div>
+    <p>Domanda ponte: esiste una grandezza che si conserva <em>sempre</em>, anche quando ci sono attrito, urti, deformazioni? Sì — la quantità di moto, a patto di guardare al sistema nel suo complesso.</p>
+  </section>
+
+  <!-- 5: Quantità di moto -->
+  <section class="slide">
+    <div class="kicker">03 — Quantità di moto</div>
+    <h2>Definizione e impulso</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>Quantità di moto</h3>
+        <div class="formula">\[ \vec{p} = m\vec{v} \]</div>
+        <p style="margin:0;">Grandezza vettoriale — kg·m/s</p>
+      </div>
+      <div class="card">
+        <h3>Newton in forma generale</h3>
+        <div class="formula">\[ \vec{F} = \dfrac{d\vec{p}}{dt} \]</div>
+        <p style="margin:0;">Impulso: \( \vec{J} = \vec{F}\,\Delta t = \Delta \vec{p} \)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6: Sistema isolato -->
+  <section class="slide">
+    <div class="kicker">04 — Conservazione</div>
+    <h2>Sistema isolato</h2>
+    <p class="lede">Risultante delle forze <em>esterne</em> nulla. Le forze interne esistono, ma si annullano a coppie per la terza legge di Newton.</p>
+    <div class="formula">\[ \vec{F}_{12} = -\vec{F}_{21} \quad\Rightarrow\quad \vec{p}_{tot} = \text{costante} \]</div>
+    <p>Vale indipendentemente dal fatto che le forze interne siano conservative o dissipative — per questo è più generale della sola conservazione dell'energia meccanica.</p>
+  </section>
+
+  <!-- 7: Legge conservazione -->
+  <section class="slide">
+    <div class="kicker">04 — Conservazione</div>
+    <h2>La legge di conservazione</h2>
+    <div class="formula hero-eq">\[ m_1\vec{v}_{1i} + m_2\vec{v}_{2i} = m_1\vec{v}_{1f} + m_2\vec{v}_{2f} \]</div>
+    <p class="lede">Questa relazione vettoriale vale per qualunque interazione interna a un sistema isolato di due corpi — compresi tutti i tipi di urto.</p>
+  </section>
+
+  <!-- 8: Urto elastico -->
+  <section class="slide">
+    <div class="kicker">05 — Urti</div>
+    <span class="tag">ELASTICO</span>
+    <h2>Si conserva anche l'energia cinetica</h2>
+    <div class="grid2">
+      <div>
+        <div class="formula">\[ \tfrac12 m_1v_{1i}^2+\tfrac12 m_2v_{2i}^2=\tfrac12 m_1v_{1f}^2+\tfrac12 m_2v_{2f}^2 \]</div>
+      </div>
+      <div>
+        <div class="formula">\[ v_{1f}=\dfrac{(m_1-m_2)v_{1i}+2m_2v_{2i}}{m_1+m_2} \]</div>
+      </div>
+    </div>
+    <p>I corpi si separano dopo l'urto.</p>
+  </section>
+
+  <!-- 9: Urto anelastico -->
+  <section class="slide">
+    <div class="kicker">05 — Urti</div>
+    <span class="tag">ANELASTICO</span>
+    <h2>L'energia cinetica non si conserva</h2>
+    <div class="formula">\[ v_f = \dfrac{m_1v_{1i}+m_2v_{2i}}{m_1+m_2} \]</div>
+    <p>I due corpi restano uniti dopo l'urto e si muovono con la stessa velocità finale. Parte dell'energia cinetica si trasforma in calore, deformazione, suono.</p>
+    <div class="formula">\[ \Delta E_k = \left(\tfrac12 m_1v_{1i}^2+\tfrac12 m_2v_{2i}^2\right)-\tfrac12(m_1+m_2)v_f^2 \]</div>
+  </section>
+
+  <!-- 10: Anelastico parziale -->
+  <section class="slide">
+    <div class="kicker">05 — Urti</div>
+    <span class="tag">CASO INTERMEDIO</span>
+    <h2>Urto anelastico parziale</h2>
+    <p class="lede">I corpi non restano uniti, ma l'energia cinetica non si conserva del tutto.</p>
+    <div class="formula">\[ e = \dfrac{v_{2f}-v_{1f}}{v_{1i}-v_{2i}} \]</div>
+    <p>Coefficiente di restituzione: \(e=1\) → elastico · \(e=0\) → completamente anelastico.</p>
+  </section>
+
+  <!-- 11: Tabella riassuntiva -->
+  <section class="slide">
+    <div class="kicker">05 — Urti</div>
+    <h2>In sintesi</h2>
+    <ul>
+      <li><strong>Elastico</strong> — quantità di moto conservata, energia cinetica conservata, corpi separati</li>
+      <li><strong>Anelastico parziale</strong> — quantità di moto conservata, energia cinetica non conservata, corpi separati</li>
+      <li><strong>Completamente anelastico</strong> — quantità di moto conservata, energia cinetica non conservata, corpi uniti</li>
+    </ul>
+  </section>
+
+  <!-- 12: Simulatore -->
+  <section class="slide">
+    <div class="kicker">06 — Verifica</div>
+    <h2>Dalla teoria alla simulazione</h2>
+    <p class="lede">Il prompt per generare un simulatore interattivo degli urti — masse e velocità impostabili, tipo di urto selezionabile, quantità di moto ed energia cinetica confrontate in tempo reale — è nel documento della lezione.</p>
+    <p>Provare a prevedere le velocità finali con le formule, poi verificare con il simulatore: è il modo più diretto per far vedere che la quantità di moto resta invariata mentre l'energia cinetica cala solo quando l'urto non è elastico.</p>
+  </section>
+
+</div>
+
+<div class="foot">
+  <span id="slide-label">01 / 12</span>
+  <div class="prog" id="prog"></div>
+</div>
+
+<div class="nav">
+  <button class="prev" aria-label="Slide precedente">‹</button>
+  <button class="next" aria-label="Slide successiva">›</button>
+</div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let i = 0;
+  const label = document.getElementById('slide-label');
+  const progWrap = document.getElementById('prog');
+
+  for(let k=0;k<total;k++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (k===0 ? ' on' : '');
+    progWrap.appendChild(d);
+  }
+  const dots = progWrap.children;
+
+  function show(n){
+    slides[i].classList.remove('active');
+    dots[i].classList.remove('on');
+    i = (n + total) % total;
+    slides[i].classList.add('active');
+    dots[i].classList.add('on');
+    label.textContent = String(i+1).padStart(2,'0') + ' / ' + total;
+  }
+
+  document.querySelector('.next').addEventListener('click', () => show(i+1));
+  document.querySelector('.prev').addEventListener('click', () => show(i-1));
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight' || e.key === ' ') show(i+1);
+    if(e.key === 'ArrowLeft') show(i-1);
+  });
+})();
+</script>
+
+</body>
+</html>
